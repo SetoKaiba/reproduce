@@ -1,0 +1,67 @@
+<html>
+<head>
+    <title>keycloak-spa</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="http://localhost:8180/js/keycloak.js"></script>
+    <script>
+        var keycloak = new Keycloak();
+        keycloak.init({onLoad: 'login-required'}).then(authenticated => {
+            console.log(`authenticated: ${authenticated}`);
+        }).catch(reason => {
+            console.log(reason);
+        });
+
+        function requestRestWithBearer() {
+            axios.get("/live/test", {
+                headers: {
+                    'Authorization': 'Bearer ' + keycloak.token
+                }
+            })
+                .then(function (response) {
+                    console.log("Response: ", response.status);
+                }).catch(function (error) {
+                console.log('refreshing');
+                keycloak.updateToken(5).then(function () {
+                    console.log('Token refreshed');
+                }).catch(function () {
+                    console.log('Failed to refresh token');
+                });
+            });
+        }
+
+        function requestRestWithoutBearer() {
+            axios.get("/live/test")
+                .then(function (response) {
+                    console.log("Response: ", response.status);
+                }).catch(function (error) {
+                console.log('refreshing');
+                keycloak.updateToken(5).then(function () {
+                    console.log('Token refreshed');
+                }).catch(function () {
+                    console.log('Failed to refresh token');
+                });
+            });
+        }
+
+        function connectWsWithBearer() {
+            var ws = new WebSocket("ws://localhost:8880/liveWebSocket/test", ["Bearer", keycloak.token]);
+            ws.onopen = function() {
+                ws.send("test");
+            }
+        }
+
+        function connectWsWithoutBearer() {
+            var ws = new WebSocket("ws://localhost:8880/liveWebSocket/test");
+            ws.onopen = function() {
+                ws.send("test");
+            }
+        }
+    </script>
+</head>
+<body>
+<button onclick="requestRestWithBearer()">Request REST with Bearer</button>
+<button onclick="requestRestWithoutBearer()">Request REST without Bearer</button>
+<button onclick="connectWsWithBearer()">Connect Ws with Bearer</button>
+<button onclick="connectWsWithoutBearer()">Connect Ws without Bearer</button>
+</body>
+</html>
