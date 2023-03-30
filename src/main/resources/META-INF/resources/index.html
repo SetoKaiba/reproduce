@@ -4,8 +4,16 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="http://localhost:8180/js/keycloak.js"></script>
     <script>
-        var keycloak = new Keycloak();
-        keycloak.init({onLoad: 'login-required'}).then(authenticated => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const port = urlParams.get('port');
+        var keycloak = new Keycloak({
+            url: 'http://localhost:' + port,
+            realm: 'quarkus',
+            clientId: 'frontend'
+        });
+        keycloak.init({
+            onLoad: 'login-required'
+        }).then(authenticated => {
             console.log(`authenticated: ${authenticated}`);
         }).catch(reason => {
             console.log(reason);
@@ -45,14 +53,14 @@
 
         function connectWsWithBearer() {
             var ws = new WebSocket("ws://localhost:8880/liveWebSocket/test", ["Bearer", keycloak.token]);
-            ws.onopen = function() {
+            ws.onopen = function () {
                 ws.send("test");
             }
         }
 
         function connectWsWithoutBearer() {
             var ws = new WebSocket("ws://localhost:8880/liveWebSocket/test");
-            ws.onopen = function() {
+            ws.onopen = function () {
                 ws.send("test");
             }
         }
