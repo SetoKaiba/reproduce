@@ -10,6 +10,7 @@ repositories {
 
 dependencies {
     implementation 'io.quarkus:quarkus-reactive-routes'
+    implementation 'io.quarkus:quarkus-oidc-token-propagation'
     implementation 'io.quarkus:quarkus-keycloak-authorization'
     implementation 'io.quarkus:quarkus-oidc'
     implementation 'io.quarkus:quarkus-websockets'
